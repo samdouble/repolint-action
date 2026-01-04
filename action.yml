@@ -1,0 +1,10 @@
+name: repolint
+description: A GitHub Action that checks the repository for consistency
+author: samdouble
+inputs:
+  message:
+    description: The message to log
+    required: true
+runs:
+  using: node20
+  main: dist/index.js

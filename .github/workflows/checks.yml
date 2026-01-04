@@ -1,0 +1,37 @@
+name: Checks
+
+on: [pull_request]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  checks:
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        node-version: ['20.19.4', '22.21.1', '24.12.0']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install
+        run: |
+          npm install
+      - name: Lint
+        run: |
+          npm run lint
+      - name: Audit
+        run: |
+          npm audit --audit-level=moderate
+      - name: Test
+        run: |
+          npm test
+      - name: Build
+        run: |
+          npm run build
