@@ -4,8 +4,10 @@ author: samdouble
 inputs:
   github-token:
     description: GitHub token for API access
-    required: true
+    required: false
     default: ${{ github.token }}
+permissions:
+  contents: read
 runs:
   using: node20
   main: dist/index.js
