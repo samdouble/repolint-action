@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const getConfig = () => {
+export const getConfig = () => {
   const workspaceRoot = process.env.GITHUB_WORKSPACE || process.cwd();
   const configPath = path.join(workspaceRoot, 'repolint.json');
 
@@ -38,7 +38,27 @@ export async function main() {
   core.info(`Found ${repos.length} repositories:`);
   for (const repo of repos) {
     core.info(`  - ${repo.full_name} (${repo.private ? 'private' : 'public'})`);
+    core.info(`==================`);
+
+    try {
+      const { data: contents } = await octokit.rest.repos.getContent({
+        owner: repo.owner.login,
+        repo: repo.name,
+        path: '',
+      });
+
+      if (Array.isArray(contents)) {
+        for (const item of contents) {
+          const icon = item.type === 'dir' ? '📁' : '📄';
+          core.info(`      ${icon} ${item.name}`);
+        }
+      }
+    } catch (error) {
+      core.warning(`Could not fetch contents: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 }
 
-main();
+if (process.env.NODE_ENV !== 'test') {
+  main();
+}
