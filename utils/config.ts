@@ -2,11 +2,10 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 import * as path from 'path';
 import { z } from 'zod';
+import { ruleConfigSchema } from '../src/rules';
 
 const configSchema = z.object({
-  rules: z.object({
-    'readme-exists': z.boolean().optional(),
-  }).optional(),
+  rules: ruleConfigSchema.optional().default({}),
 });
 
 export type Config = z.infer<typeof configSchema>;
