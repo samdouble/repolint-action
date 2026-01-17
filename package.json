@@ -1,6 +1,6 @@
 {
   "name": "log-input-action",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A simple GitHub Action that logs an input",
   "main": "index.js",
   "author": "samdouble",
