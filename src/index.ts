@@ -2,7 +2,6 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Config, getConfig } from '../utils/config';
 import { rulesMapper } from './rulesMapper';
-import { ReadmeExistsOptions } from './rules/readme-exists';
 
 export async function main() {
   core.info(`Running repolint action`);
@@ -35,7 +34,7 @@ export async function main() {
       for (const [rule, ruleOptions] of Object.entries(config.rules ?? {})) {
         const ruleFunction = rulesMapper[rule as keyof typeof rulesMapper];
         if (ruleFunction) {
-          const result = await ruleFunction(octokit, repo, ruleOptions as unknown as ReadmeExistsOptions);
+          const result = await ruleFunction(octokit, repo, ruleOptions);
           if (result) {
             core.info(`  - ${rule} passed`);
           } else {

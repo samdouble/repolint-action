@@ -49,13 +49,35 @@ The action can be configured by creating a `repolint.json` file at the root of y
 
 ### Rules
 
-#### `readme-exists`
+#### `file-exists`
 
-The `readme-exists` rule checks if a README file exists in the repository.
+The `file-exists` rule checks if a file exists in the repository.
 
 ```json
 {
-  "readme-exists": {
+  "file-exists": {
+    "caseInsensitive": true,
+    "path": "file.md"
+  }
+}
+```
+
+##### `caseInsensitive`
+
+The `caseInsensitive` option is used to check if the file exists in a case-insensitive manner. 
+Default: `false`.
+
+##### `path`
+
+The `path` option is used to specify the path to the file. It is mandatory.
+
+#### `readme/exists`
+
+The `readme/exists` rule checks if a README file exists in the repository.
+
+```json
+{
+  "readme/exists": {
     "caseInsensitive": true,
     "path": "README.md"
   }
