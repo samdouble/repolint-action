@@ -6,19 +6,16 @@ import { z } from 'zod';
 import { ruleConfigSchema } from '../rules';
 
 export const configSchema = z.object({
-  rules: [
-    z.enum(['error', 'warning']),
-    ruleConfigSchema.optional().default({}),
-  ],
+  rules: ruleConfigSchema.optional().default({}),
 });
 
 export type Config = z.infer<typeof configSchema>;
 
 const CONFIG_FILES = [
-  'repolint.config.ts',
-  'repolint.config.js',
-  'repolint.config.mjs',
-  'repolint.config.cjs',
+  'repofmt.config.ts',
+  'repofmt.config.js',
+  'repofmt.config.mjs',
+  'repofmt.config.cjs',
 ];
 
 export const getConfig = async (configPathArg?: string): Promise<Config> => {

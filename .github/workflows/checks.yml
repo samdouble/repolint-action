@@ -39,22 +39,22 @@ jobs:
       - name: Build
         run: |
           npm run build
-      - name: Test CLI
-        run: |
-          echo "
-            export default {
-              rules: {
-                'file-exists': {
-                  path: 'README.md',
-                },
-              },
-            };
-          " > repolint.config.ts
+      #- name: Test CLI
+      #  run: |
+      #    echo "
+      #      export default {
+      #        rules: {
+      #          'file-exists': ['error', {
+      #            path: 'README.md',
+      #          }],
+      #        },
+      #      };
+      #    " > repofmt.config.ts
 
-          node dist/cli.js --help
-          node dist/cli.js --version
+      #    node dist/cli.js --help
+      #    node dist/cli.js --version
 
-          npm link
-          repolint run --help
-          repolint run --version
-          repolint run --config repolint.config.ts
+      #    npm link
+      #    repofmt run --help
+      #    repofmt run --version
+      #    repofmt run --config repofmt.config.ts

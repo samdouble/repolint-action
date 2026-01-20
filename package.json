@@ -1,5 +1,5 @@
 {
-  "name": "repolint-action",
+  "name": "repofmt-action",
   "private": true,
   "workspaces": [
     "lib"

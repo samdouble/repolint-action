@@ -1,11 +1,11 @@
 {
-  "name": "repolint",
+  "name": "repofmt",
   "version": "0.1.0",
   "description": "A CLI tool that checks consistency across repositories",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "repolint": "dist/cli.js"
+    "repofmt": "dist/cli.js"
   },
   "files": [
     "dist"
@@ -13,13 +13,13 @@
   "author": "samdouble",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samdouble/repolint-action.git",
+    "url": "git+https://github.com/samdouble/repofmt-action.git",
     "directory": "lib"
   },
   "bugs": {
-    "url": "https://github.com/samdouble/repolint-action/issues"
+    "url": "https://github.com/samdouble/repofmt-action/issues"
   },
-  "homepage": "https://github.com/samdouble/repolint-action#readme",
+  "homepage": "https://github.com/samdouble/repofmt-action#readme",
   "scripts": {
     "build": "tsup",
     "lint": "eslint",
@@ -27,7 +27,7 @@
     "test": "jest"
   },
   "keywords": [
-    "repolint",
+    "repofmt",
     "repository",
     "consistency",
     "lint",

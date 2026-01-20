@@ -1,5 +1,5 @@
 import type { getOctokit } from '@actions/github';
-import { fileExists, fileExistsOptionsSchema, type fileExistsOptions } from './file-exists';
+import { fileExists, FileExistsOptionsSchema, type FileExistsOptions } from './file-exists';
 
 const mockGetContent = jest.fn();
 const mockOctokit = {
@@ -125,7 +125,7 @@ describe('fileExists', () => {
       });
 
       await expect(
-        fileExists(mockOctokit, mockRepository, {} as fileExistsOptions),
+        fileExists(mockOctokit, mockRepository, {} as FileExistsOptions),
       ).rejects.toThrow('Invalid rule options');
     });
 
@@ -135,33 +135,33 @@ describe('fileExists', () => {
       });
 
       await expect(
-        fileExists(mockOctokit, mockRepository, { path: 123 } as unknown as fileExistsOptions),
+        fileExists(mockOctokit, mockRepository, { path: 123 } as unknown as FileExistsOptions),
       ).rejects.toThrow('Invalid rule options');
     });
   });
 });
 
-describe('fileExistsOptionsSchema', () => {
+describe('FileExistsOptionsSchema', () => {
   it('should parse valid options with path only', () => {
-    const result = fileExistsOptionsSchema.parse({ path: 'README.md' });
+    const result = FileExistsOptionsSchema.parse({ path: 'README.md' });
     expect(result).toEqual({ path: 'README.md', caseSensitive: false });
   });
 
   it('should parse valid options with caseSensitive: true', () => {
-    const result = fileExistsOptionsSchema.parse({ path: 'README.md', caseSensitive: true });
+    const result = FileExistsOptionsSchema.parse({ path: 'README.md', caseSensitive: true });
     expect(result).toEqual({ path: 'README.md', caseSensitive: true });
   });
 
   it('should default caseSensitive to false', () => {
-    const result = fileExistsOptionsSchema.parse({ path: 'README.md' });
+    const result = FileExistsOptionsSchema.parse({ path: 'README.md' });
     expect(result.caseSensitive).toBe(false);
   });
 
   it('should throw when path is missing', () => {
-    expect(() => fileExistsOptionsSchema.parse({})).toThrow();
+    expect(() => FileExistsOptionsSchema.parse({})).toThrow();
   });
 
   it('should throw when path is not a string', () => {
-    expect(() => fileExistsOptionsSchema.parse({ path: 123 })).toThrow();
+    expect(() => FileExistsOptionsSchema.parse({ path: 123 })).toThrow();
   });
 });
