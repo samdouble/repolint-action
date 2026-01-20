@@ -1,5 +1,5 @@
 import { getOctokit } from '@actions/github';
-import { licenseExists, licenseExistsOptionsSchema, type licenseExistsOptions } from './license-exists';
+import { licenseExists, LicenseExistsOptionsSchema, type LicenseExistsOptions } from './license-exists';
 
 const mockGetContent = jest.fn();
 const mockOctokit = {
@@ -29,7 +29,7 @@ describe('licenseExists', () => {
         ],
       });
 
-      const result = await licenseExists(mockOctokit, mockRepository, {} as licenseExistsOptions);
+      const result = await licenseExists(mockOctokit, mockRepository, {} as LicenseExistsOptions);
       expect(result).toEqual({ errors: [] });
     });
 
@@ -41,7 +41,7 @@ describe('licenseExists', () => {
         ],
       });
 
-      const result = await licenseExists(mockOctokit, mockRepository, {} as licenseExistsOptions);
+      const result = await licenseExists(mockOctokit, mockRepository, {} as LicenseExistsOptions);
       expect(result).toEqual({ errors: [] });
     });
 
@@ -53,7 +53,7 @@ describe('licenseExists', () => {
         ],
       });
 
-      const result = await licenseExists(mockOctokit, mockRepository, { path: 'LICENSE.txt' } as licenseExistsOptions);
+      const result = await licenseExists(mockOctokit, mockRepository, { path: 'LICENSE.txt' } as LicenseExistsOptions);
       expect(result).toEqual({ errors: [] });
     });
   });
@@ -67,7 +67,7 @@ describe('licenseExists', () => {
         ],
       });
 
-      const result = await licenseExists(mockOctokit, mockRepository, {} as licenseExistsOptions);
+      const result = await licenseExists(mockOctokit, mockRepository, {} as LicenseExistsOptions);
       expect(result).toEqual({ errors: ['LICENSE.md not found'] });
     });
 
@@ -76,7 +76,7 @@ describe('licenseExists', () => {
         data: [],
       });
 
-      const result = await licenseExists(mockOctokit, mockRepository, {} as licenseExistsOptions);
+      const result = await licenseExists(mockOctokit, mockRepository, {} as LicenseExistsOptions);
       expect(result).toEqual({ errors: ['LICENSE.md not found'] });
     });
   });
@@ -114,7 +114,7 @@ describe('licenseExists', () => {
       });
 
       await expect(
-        licenseExists(mockOctokit, mockRepository, { caseSensitive: 'yes' } as unknown as licenseExistsOptions),
+        licenseExists(mockOctokit, mockRepository, { caseSensitive: 'yes' } as unknown as LicenseExistsOptions),
       ).rejects.toThrow('Invalid rule options');
     });
 
@@ -124,38 +124,38 @@ describe('licenseExists', () => {
       });
 
       await expect(
-        licenseExists(mockOctokit, mockRepository, { path: 123 } as unknown as licenseExistsOptions),
+        licenseExists(mockOctokit, mockRepository, { path: 123 } as unknown as LicenseExistsOptions),
       ).rejects.toThrow('Invalid rule options');
     });
   });
 });
 
-describe('licenseExistsOptionsSchema', () => {
+describe('LicenseExistsOptionsSchema', () => {
   it('should parse empty options with defaults', () => {
-    const result = licenseExistsOptionsSchema.parse({});
+    const result = LicenseExistsOptionsSchema.parse({});
     expect(result).toEqual({ path: 'LICENSE.md', caseSensitive: false });
   });
 
   it('should parse options with custom path', () => {
-    const result = licenseExistsOptionsSchema.parse({ path: 'LICENSE.txt' });
+    const result = LicenseExistsOptionsSchema.parse({ path: 'LICENSE.txt' });
     expect(result).toEqual({ path: 'LICENSE.txt', caseSensitive: false });
   });
 
   it('should parse options with caseSensitive: true', () => {
-    const result = licenseExistsOptionsSchema.parse({ caseSensitive: true });
+    const result = LicenseExistsOptionsSchema.parse({ caseSensitive: true });
     expect(result).toEqual({ path: 'LICENSE.md', caseSensitive: true });
   });
 
   it('should parse options with all values specified', () => {
-    const result = licenseExistsOptionsSchema.parse({ path: 'COPYING', caseSensitive: true });
+    const result = LicenseExistsOptionsSchema.parse({ path: 'COPYING', caseSensitive: true });
     expect(result).toEqual({ path: 'COPYING', caseSensitive: true });
   });
 
   it('should throw when path is not a string', () => {
-    expect(() => licenseExistsOptionsSchema.parse({ path: 123 })).toThrow();
+    expect(() => LicenseExistsOptionsSchema.parse({ path: 123 })).toThrow();
   });
 
   it('should throw when caseSensitive is not a boolean', () => {
-    expect(() => licenseExistsOptionsSchema.parse({ caseSensitive: 'yes' })).toThrow();
+    expect(() => LicenseExistsOptionsSchema.parse({ caseSensitive: 'yes' })).toThrow();
   });
 });

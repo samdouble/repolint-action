@@ -1,4 +1,4 @@
-name: repolint
+name: repofmt
 description: A GitHub Action that checks consistency across repositories
 author: samdouble
 inputs:
@@ -19,12 +19,12 @@ runs:
       working-directory: ${{ github.action_path }}/lib
       run: npm ci
 
-    - name: Build repolint
+    - name: Build repofmt
       shell: bash
       working-directory: ${{ github.action_path }}/lib
       run: npm run build
 
-    - name: Run repolint
+    - name: Run repofmt
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}

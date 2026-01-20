@@ -30,7 +30,7 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.PAT }}
         with:
           command: pr
-          upstream_repo: repolint-action
+          upstream_repo: repofmt-action
           upstream_owner: samdouble
           description: Build dist folder
           title: "chore: build dist"

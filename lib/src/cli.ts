@@ -13,17 +13,17 @@ const packageJson = JSON.parse(
 const program = new Command();
 
 program
-  .name('repolint')
+  .name('repofmt')
   .description('A CLI tool that checks consistency across repositories')
   .version(packageJson.version);
 
 program
   .command('run')
-  .description('Run repolint checks against your repositories')
+  .description('Run repofmt checks against your repositories')
   .option('--config <path>', 'path to config file')
   .option('--token <token>', 'GitHub token (can also use GITHUB_TOKEN env var)')
   .action(async (options) => {
-    console.log('Running repolint...');
+    console.log('Running repofmt...');
 
     let config;
     try {

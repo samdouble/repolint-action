@@ -1,27 +1,33 @@
 import type { getOctokit } from '@actions/github';
 import type { RestEndpointMethodTypes } from '@octokit/plugin-rest-endpoint-methods';
 import { z } from 'zod';
+import { AlertLevelSchema } from '../utils/types';
 
-export const fileExistsOptionsSchema = z.object({
+export const FileExistsOptionsSchema = z.object({
   caseSensitive: z.boolean().default(false),
   path: z.string(),
 });
 
-export type fileExistsOptions = z.input<typeof fileExistsOptionsSchema>;
+export const FileExistsSchema = z.tuple([
+  AlertLevelSchema,
+  FileExistsOptionsSchema,
+]);
+
+export type FileExistsOptions = z.input<typeof FileExistsOptionsSchema>;
 
 type Octokit = ReturnType<typeof getOctokit>;
 type Repository = RestEndpointMethodTypes['repos']['listForAuthenticatedUser']['response']['data'][number];
 
-export const fileExists = async (octokit: Octokit, repository: Repository, ruleOptions: fileExistsOptions) => {
+export const fileExists = async (octokit: Octokit, repository: Repository, ruleOptions: FileExistsOptions) => {
   const errors: string[] = [];
   const { data: contents } = await octokit.rest.repos.getContent({
     owner: repository.owner.login,
     repo: repository.name,
     path: '',
   });
-  let sanitizedRuleOptions: fileExistsOptions;
+  let sanitizedRuleOptions: FileExistsOptions;
   try {
-    sanitizedRuleOptions = fileExistsOptionsSchema.parse(ruleOptions);
+    sanitizedRuleOptions = FileExistsOptionsSchema.parse(ruleOptions);
   } catch (error) {
     throw new Error(`Invalid rule options: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
