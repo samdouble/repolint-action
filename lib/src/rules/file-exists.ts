@@ -1,4 +1,5 @@
 import nodePath from 'node:path';
+import { minimatch } from 'minimatch';
 import { z } from 'zod';
 import { AlertLevelSchema } from '../utils/types';
 import type { RuleContext } from '../utils/context';
@@ -18,6 +19,10 @@ export const FileExistsSchema = z.object({
 });
 
 export type FileExistsOptions = z.input<typeof FileExistsOptionsSchema>;
+
+const isGlobPattern = (path: string): boolean => {
+  return /[*?[\]{}]/.test(path);
+};
 
 const checkEntryExists = async (
   context: RuleContext,
@@ -56,6 +61,27 @@ const checkEntryExists = async (
   return !!entry;
 };
 
+const checkPatternExists = async (
+  context: RuleContext,
+  pattern: string,
+  caseSensitive: boolean,
+  entryType: 'file' | 'directory' | 'any',
+): Promise<boolean> => {
+  const allFiles = await context.getAllFiles();
+
+  const matchingEntry = allFiles.find(entry => {
+    if (entryType === 'file' && entry.type !== 'file') return false;
+    if (entryType === 'directory' && entry.type !== 'dir') return false;
+
+    return minimatch(entry.path, pattern, {
+      nocase: !caseSensitive,
+      dot: true,
+    });
+  });
+
+  return !!matchingEntry;
+};
+
 export const fileExists = async (context: RuleContext, ruleOptions: FileExistsOptions) => {
   const errors: string[] = [];
 
@@ -71,12 +97,11 @@ export const fileExists = async (context: RuleContext, ruleOptions: FileExistsOp
     : [sanitizedRuleOptions.path];
 
   for (const entryPath of paths) {
-    const exists = await checkEntryExists(
-      context,
-      entryPath,
-      sanitizedRuleOptions.caseSensitive,
-      sanitizedRuleOptions.type,
-    );
+    const isPattern = isGlobPattern(entryPath);
+    const exists = isPattern
+      ? await checkPatternExists(context, entryPath, sanitizedRuleOptions.caseSensitive, sanitizedRuleOptions.type)
+      : await checkEntryExists(context, entryPath, sanitizedRuleOptions.caseSensitive, sanitizedRuleOptions.type);
+
     if (exists) {
       return { errors };
     }

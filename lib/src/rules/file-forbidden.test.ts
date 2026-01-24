@@ -347,6 +347,11 @@ describe('FileForbiddenOptionsSchema', () => {
   it('should throw when type is invalid', () => {
     expect(() => FileForbiddenOptionsSchema.parse({ path: 'src', type: 'invalid' })).toThrow();
   });
+
+  it('should parse path with glob pattern', () => {
+    const result = FileForbiddenOptionsSchema.parse({ path: '*.log' });
+    expect(result).toEqual({ path: '*.log', caseSensitive: false, type: 'file' });
+  });
 });
 
 describe('fileForbidden with multiple paths', () => {
@@ -417,5 +422,142 @@ describe('fileForbidden with multiple paths', () => {
       path: ['config/secrets.json', 'config/credentials.json'],
     });
     expect(result).toEqual({ errors: ['config/secrets.json should not exist'] });
+  });
+});
+
+describe('fileForbidden with glob patterns', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should pass when no files match the glob pattern', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'README.md', type: 'file' },
+            { name: 'package.json', type: 'file' },
+          ],
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: '*.log' });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should fail when files match the glob pattern', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'debug.log', type: 'file' },
+            { name: 'README.md', type: 'file' },
+          ],
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: '*.log' });
+    expect(result).toEqual({ errors: ['debug.log should not exist'] });
+  });
+
+  it('should report all files matching the glob pattern', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'debug.log', type: 'file' },
+            { name: 'error.log', type: 'file' },
+            { name: 'README.md', type: 'file' },
+          ],
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: '*.log' });
+    expect(result).toEqual({ errors: ['[debug.log, error.log] should not exist'] });
+  });
+
+  it('should find files in nested directories with glob', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'logs', type: 'dir' }] });
+      }
+      if (path === 'logs') {
+        return Promise.resolve({ data: [{ name: 'app.log', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: '**/*.log' });
+    expect(result).toEqual({ errors: ['logs/app.log should not exist'] });
+  });
+
+  it('should work with array of glob patterns', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'debug.log', type: 'file' },
+            { name: 'temp.tmp', type: 'file' },
+            { name: 'README.md', type: 'file' },
+          ],
+        });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: ['*.log', '*.tmp'] });
+    expect(result).toEqual({ errors: ['[debug.log, temp.tmp] should not exist'] });
+  });
+
+  it('should find directories when type is directory with glob', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'node_modules', type: 'dir' },
+            { name: 'src', type: 'dir' },
+            { name: 'README.md', type: 'file' },
+          ],
+        });
+      }
+      if (path === 'node_modules') {
+        return Promise.resolve({ data: [{ name: 'some-package', type: 'dir' }] });
+      }
+      if (path === 'node_modules/some-package') {
+        return Promise.resolve({ data: [{ name: 'index.js', type: 'file' }] });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'index.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: 'node_modules', type: 'directory' });
+    expect(result).toEqual({ errors: ['node_modules should not exist'] });
+  });
+
+  it('should respect caseSensitive option with glob patterns', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'DEBUG.LOG', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileForbidden(context, { path: '*.log', caseSensitive: true });
+    expect(result).toEqual({ errors: [] });
   });
 });
