@@ -428,4 +428,153 @@ describe('FileExistsOptionsSchema', () => {
   it('should throw when type is invalid', () => {
     expect(() => FileExistsOptionsSchema.parse({ path: 'src', type: 'invalid' })).toThrow();
   });
+
+  it('should parse path with glob pattern', () => {
+    const result = FileExistsOptionsSchema.parse({ path: '*.md' });
+    expect(result).toEqual({ path: '*.md', caseSensitive: false, type: 'file' });
+  });
+});
+
+describe('fileExists with glob patterns', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should find a file matching a glob pattern', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'README.md', type: 'file' },
+            { name: 'package.json', type: 'file' },
+            { name: 'src', type: 'dir' },
+          ],
+        });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'index.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: '*.md' });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should not find a file when pattern does not match', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'package.json', type: 'file' },
+            { name: 'src', type: 'dir' },
+          ],
+        });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'index.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: '*.md' });
+    expect(result).toEqual({ errors: ['*.md not found'] });
+  });
+
+  it('should find files in nested directories with glob', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'src', type: 'dir' }] });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'index.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: 'src/*.ts' });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should find files with glob pattern **', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'src', type: 'dir' }] });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'utils', type: 'dir' }] });
+      }
+      if (path === 'src/utils') {
+        return Promise.resolve({ data: [{ name: 'helper.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: '**/*.ts' });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should work with array of glob patterns', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'README.txt', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: ['*.md', '*.txt'] });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should report error when no patterns match', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'package.json', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: ['*.md', '*.txt'] });
+    expect(result).toEqual({ errors: ['one of [*.md, *.txt] not found'] });
+  });
+
+  it('should find directories when type is directory with glob', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({
+          data: [
+            { name: 'src', type: 'dir' },
+            { name: 'README.md', type: 'file' },
+          ],
+        });
+      }
+      if (path === 'src') {
+        return Promise.resolve({ data: [{ name: 'index.ts', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: 's*', type: 'directory' });
+    expect(result).toEqual({ errors: [] });
+  });
+
+  it('should respect caseSensitive option with glob patterns', async () => {
+    mockGetContent.mockImplementation(({ path }) => {
+      if (path === '') {
+        return Promise.resolve({ data: [{ name: 'README.md', type: 'file' }] });
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+
+    const context = new RuleContext(mockOctokit, mockRepository);
+    const result = await fileExists(context, { path: 'readme.md', caseSensitive: true });
+    expect(result).toEqual({ errors: ['readme.md not found'] });
+  });
 });
