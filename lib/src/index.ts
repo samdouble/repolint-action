@@ -69,6 +69,15 @@ function matchesFilters(repo: Repository, filters?: Config['filters']): boolean 
     }
   }
 
+  if (filters.archived !== undefined) {
+    if (filters.archived && !repo.archived) {
+      return false;
+    }
+    if (!filters.archived && repo.archived) {
+      return false;
+    }
+  }
+
   if (filters.organizations && filters.organizations.length > 0) {
     if (!filters.organizations.includes(repo.owner.login)) {
       return false;

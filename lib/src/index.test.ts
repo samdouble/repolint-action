@@ -122,6 +122,141 @@ describe('run', () => {
       });
     });
 
+    it('should filter by archived: true', async () => {
+      const archivedRepo = {
+        ...mockRepository,
+        name: 'archived-repo',
+        full_name: 'test-owner/archived-repo',
+        archived: true,
+      };
+      const activeRepo = {
+        ...mockRepository,
+        name: 'active-repo',
+        full_name: 'test-owner/active-repo',
+        archived: false,
+      };
+
+      mockListRepos.mockResolvedValue({
+        data: [archivedRepo, activeRepo],
+      });
+      mockGetContent.mockResolvedValue({ data: [] });
+
+      const config: Config = {
+        rules: [],
+        filters: {
+          archived: true,
+        },
+      };
+
+      const results = await run(mockOctokit, config);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].repository).toBe('test-owner/archived-repo');
+    });
+
+    it('should filter by archived: false', async () => {
+      const archivedRepo = {
+        ...mockRepository,
+        name: 'archived-repo',
+        full_name: 'test-owner/archived-repo',
+        archived: true,
+      };
+      const activeRepo = {
+        ...mockRepository,
+        name: 'active-repo',
+        full_name: 'test-owner/active-repo',
+        archived: false,
+      };
+
+      mockListRepos.mockResolvedValue({
+        data: [archivedRepo, activeRepo],
+      });
+      mockGetContent.mockResolvedValue({ data: [] });
+
+      const config: Config = {
+        rules: [],
+        filters: {
+          archived: false,
+        },
+      };
+
+      const results = await run(mockOctokit, config);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].repository).toBe('test-owner/active-repo');
+    });
+
+    it('should include all repositories when archived is undefined', async () => {
+      const archivedRepo = {
+        ...mockRepository,
+        name: 'archived-repo',
+        full_name: 'test-owner/archived-repo',
+        archived: true,
+      };
+      const activeRepo = {
+        ...mockRepository,
+        name: 'active-repo',
+        full_name: 'test-owner/active-repo',
+        archived: false,
+      };
+
+      mockListRepos.mockResolvedValue({
+        data: [archivedRepo, activeRepo],
+      });
+      mockGetContent.mockResolvedValue({ data: [] });
+
+      const config: Config = {
+        rules: [],
+        filters: {},
+      };
+
+      const results = await run(mockOctokit, config);
+
+      expect(results).toHaveLength(2);
+    });
+
+    it('should combine archived and visibility filters', async () => {
+      const archivedPublicRepo = {
+        ...mockRepository,
+        name: 'archived-public',
+        full_name: 'test-owner/archived-public',
+        archived: true,
+        private: false,
+      };
+      const archivedPrivateRepo = {
+        ...mockRepository,
+        name: 'archived-private',
+        full_name: 'test-owner/archived-private',
+        archived: true,
+        private: true,
+      };
+      const activePublicRepo = {
+        ...mockRepository,
+        name: 'active-public',
+        full_name: 'test-owner/active-public',
+        archived: false,
+        private: false,
+      };
+
+      mockListRepos.mockResolvedValue({
+        data: [archivedPublicRepo, archivedPrivateRepo, activePublicRepo],
+      });
+      mockGetContent.mockResolvedValue({ data: [] });
+
+      const config: Config = {
+        rules: [],
+        filters: {
+          archived: true,
+          visibility: 'public',
+        },
+      };
+
+      const results = await run(mockOctokit, config);
+
+      expect(results).toHaveLength(1);
+      expect(results[0].repository).toBe('test-owner/archived-public');
+    });
+
     it('should filter by include', async () => {
       const repo1 = {
         ...mockRepository,

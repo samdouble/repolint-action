@@ -20,8 +20,9 @@ const regexPatternSchema = z.string().refine(
 );
 
 const filtersSchema = z.object({
-  visibility: z.enum(['public', 'private', 'all']).optional(),
+  archived: z.boolean().optional(),
   organizations: z.array(z.string()).optional(),
+  visibility: z.enum(['public', 'private', 'all']).optional(),
   include: z.array(regexPatternSchema).optional(),
   exclude: z.array(regexPatternSchema).optional(),
 });
