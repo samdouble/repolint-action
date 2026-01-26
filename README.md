@@ -63,10 +63,11 @@ The action can be configured by creating a `repofmt.config.ts` file at the root 
 ```ts
 export default {
   filters: {
-    visibility: 'public',
+    archived: false,
     organizations: ['my-org', 'other-org'],
+    visibility: 'public',
     include: ['^my-org-', '^other-org-'],
-    exclude: ['^archived-'],
+    exclude: ['^deprecated-'],
   },
   rules: [
     {
@@ -88,18 +89,20 @@ The `filters` option allows you to control which repositories are checked by the
 ```ts
 {
   filters: {
-    visibility: 'public',
+    archived: false,
     organizations: ['my-org', 'other-org'],
+    visibility: 'public',
     include: ['^my-org-', '^other-org-'],
-    exclude: ['^archived-'],
+    exclude: ['^deprecated-'],
   }
 }
 ```
 
 | Option           | Description                                                     | Required | Default      |
 |------------------|-----------------------------------------------------------------|----------|--------------|
-| `visibility`    | Filter repositories by visibility: `'public'`, `'private'`, or `'all'`. | No       | `'all'`      |
+| `archived`      | Filter repositories by archived status: `true` (only archived), `false` (only not archived), or `undefined` (all). | No       | `undefined`  |
 | `organizations` | Array of organization names to include. A repository must belong to **one of** the specified organizations to be included. | No       |              |
+| `visibility`    | Filter repositories by visibility: `'public'`, `'private'`, or `'all'`. | No       | `'all'`      |
 | `include`        | Array of regex patterns to match repository names (matches both `name` and `full_name`). A repository is included if it matches **any** pattern in the array. | No       |              |
 | `exclude`        | Array of regex patterns to exclude repository names (matches both `name` and `full_name`). A repository is excluded if it matches **any** pattern in the array. | No       |              |
 
