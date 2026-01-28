@@ -1,10 +1,12 @@
 {
   "packages": {
     ".": {
-      "release-type": "node"
+      "release-type": "node",
+      "package-name": "action"
     },
     "lib": {
-      "release-type": "node"
+      "release-type": "node",
+      "package-name": "lib"
     }
   }
 }
