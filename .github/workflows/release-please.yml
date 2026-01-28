@@ -55,6 +55,7 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: master
+          include-component-in-tag: true
 
   release-please-lib:
     runs-on: ubuntu-latest
@@ -70,4 +71,4 @@ jobs:
           manifest-file: .release-please-manifest.json
           target-branch: master
           path: lib
-
+          include-component-in-tag: true
